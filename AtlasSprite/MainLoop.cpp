@@ -5,7 +5,7 @@
 IME_Manager g_imeManager;
 
 #include "Atlas.h"
-Atlas g_atlas;
+Atlas* g_atlas = nullptr;
 
 bool MainLoop::Initialize()
 {
@@ -30,14 +30,23 @@ bool MainLoop::Initialize()
 	DEVICE->SetRenderState(D3DRS_ALPHABLENDENABLE, true);
 	DEVICE->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_SRCALPHA);
 	DEVICE->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_INVSRCALPHA);
-	DEVICE->SetTransform(D3DTS_PROJECTION, &MatrixPerspectiveBySprite(1280, 960));
 
+	g_atlas = new Atlas(DEVICE);
 
 	return true;
 }
 
 void MainLoop::Update()
 {
+	constexpr float c_ratio = 1280.f / 960.f;
+	static float viewScale = 1;
+
+	if (GetAsyncKeyState(VK_LBUTTON))
+		viewScale *= 1.01f;
+	if (GetAsyncKeyState(VK_RBUTTON))
+		viewScale *= 0.99f;
+	DEVICE->SetRenderState(D3DRS_CULLMODE, D3DCULL_NONE);
+	DEVICE->SetTransform(D3DTS_PROJECTION, &MatrixPerspectiveBySprite(c_ratio * viewScale, viewScale));
 }
 
 bool MainLoop::Render()
@@ -55,6 +64,9 @@ bool MainLoop::Render()
 
 	sp->End();
 	sp->Release();
+
+
+	g_atlas->Render();
 	return true;
 }
 
@@ -70,7 +82,7 @@ bool MainLoop::Release()
 LRESULT MainLoop::MsgProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
 	g_imeManager.MsgProc(hWnd, msg, wParam, lParam);
-	g_atlas.MsgProc(msg, wParam, lParam);
+	g_atlas->MsgProc(msg, wParam, lParam);
 
 	switch (msg)
 	{

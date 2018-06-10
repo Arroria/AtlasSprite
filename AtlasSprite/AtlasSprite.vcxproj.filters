@@ -14,6 +14,12 @@
     <Filter Include="mng">
       <UniqueIdentifier>{cb733043-fc78-43b2-94b5-ee35e69beb23}</UniqueIdentifier>
     </Filter>
+    <Filter Include="singleton">
+      <UniqueIdentifier>{d0d90286-12ce-48e5-89be-c510aef080fa}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="singleton\interface">
+      <UniqueIdentifier>{5141ae90-73d9-41de-80d0-a98653ae402b}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="targetver.h">
@@ -38,6 +44,12 @@
       <Filter>mng</Filter>
     </ClInclude>
     <ClInclude Include="Atlas.h" />
+    <ClInclude Include="Singleton.h">
+      <Filter>singleton\interface</Filter>
+    </ClInclude>
+    <ClInclude Include="PlaneRenderer.h">
+      <Filter>singleton</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="AtlasSprite.rc">
@@ -69,5 +81,11 @@
       <Filter>mng</Filter>
     </ClCompile>
     <ClCompile Include="Atlas.cpp" />
+    <ClCompile Include="Singleton.cpp">
+      <Filter>singleton\interface</Filter>
+    </ClCompile>
+    <ClCompile Include="PlaneRenderer.cpp">
+      <Filter>singleton</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

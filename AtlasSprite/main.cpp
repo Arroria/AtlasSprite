@@ -17,9 +17,9 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	g_processManager = new ProcessManager(hInstance);
 	int lastWParam = -1;
 
-	if (SUCCEEDED( g_processManager->CreateWnd(L"UI Programing Practice", WS_POPUP, MainLoop::MsgProc) ))
+	if (SUCCEEDED( g_processManager->CreateWnd(L"UI Programing Practice", WS_OVERLAPPEDWINDOW, MainLoop::MsgProc) ))
 	{
-		g_processManager->WndResize(800, 600);
+		g_processManager->WndResize(1280, 960);
 		g_processManager->WndMove(320, 60);
 		g_processManager->SetFPSLimite(240, 60);
 		g_processManager->SetFunction(MainLoop::Initialize, MainLoop::Update, MainLoop::Render, MainLoop::Release);
