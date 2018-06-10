@@ -37,6 +37,7 @@
     <ClInclude Include="..\..\IME\IME\IME_Manager.h">
       <Filter>mng</Filter>
     </ClInclude>
+    <ClInclude Include="Atlas.h" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="AtlasSprite.rc">
@@ -67,5 +68,6 @@
     <ClCompile Include="..\..\IME\IME\IME_Manager.cpp">
       <Filter>mng</Filter>
     </ClCompile>
+    <ClCompile Include="Atlas.cpp" />
   </ItemGroup>
 </Project>

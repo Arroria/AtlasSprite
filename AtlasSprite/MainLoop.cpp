@@ -4,6 +4,8 @@
 
 IME_Manager g_imeManager;
 
+#include "Atlas.h"
+Atlas g_atlas;
 
 bool MainLoop::Initialize()
 {
@@ -15,6 +17,11 @@ bool MainLoop::Initialize()
 		freopen("CONOUT$", "wb", stderr);
 	}
 #endif
+
+				
+
+	DragAcceptFiles(g_processManager->GetWndInfo()->hWnd, true);
+
 
 
 	cout.imbue(std::locale("kor"));
@@ -63,6 +70,7 @@ bool MainLoop::Release()
 LRESULT MainLoop::MsgProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
 	g_imeManager.MsgProc(hWnd, msg, wParam, lParam);
+	g_atlas.MsgProc(msg, wParam, lParam);
 
 	switch (msg)
 	{
