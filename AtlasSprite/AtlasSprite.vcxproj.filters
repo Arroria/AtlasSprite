@@ -50,6 +50,7 @@
     <ClInclude Include="PlaneRenderer.h">
       <Filter>singleton</Filter>
     </ClInclude>
+    <ClInclude Include="Camera.h" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="AtlasSprite.rc">
@@ -87,5 +88,6 @@
     <ClCompile Include="PlaneRenderer.cpp">
       <Filter>singleton</Filter>
     </ClCompile>
+    <ClCompile Include="Camera.cpp" />
   </ItemGroup>
 </Project>

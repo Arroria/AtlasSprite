@@ -6,6 +6,8 @@ IME_Manager g_imeManager;
 
 #include "Atlas.h"
 Atlas* g_atlas = nullptr;
+#include "Camera.h"
+Camera g_cam;
 
 bool MainLoop::Initialize()
 {
@@ -38,19 +40,15 @@ bool MainLoop::Initialize()
 
 void MainLoop::Update()
 {
-	constexpr float c_ratio = 1280.f / 960.f;
-	static float viewScale = 1;
-
-	if (GetAsyncKeyState(VK_LBUTTON))
-		viewScale *= 1.01f;
-	if (GetAsyncKeyState(VK_RBUTTON))
-		viewScale *= 0.99f;
-	DEVICE->SetRenderState(D3DRS_CULLMODE, D3DCULL_NONE);
-	DEVICE->SetTransform(D3DTS_PROJECTION, &MatrixPerspectiveBySprite(c_ratio * viewScale, viewScale));
+	g_inputDevice.BeginFrame(g_processManager->GetWndInfo()->hWnd);
+	g_cam.Update();
+	g_inputDevice.EndFrame();
 }
 
 bool MainLoop::Render()
 {
+	g_cam.SetProj();
+
 	LPD3DXSPRITE sp;
 	D3DXCreateSprite(DEVICE, &sp);
 	sp->Begin(D3DXSPRITE_ALPHABLEND);
@@ -81,6 +79,7 @@ bool MainLoop::Release()
 
 LRESULT MainLoop::MsgProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
+	g_inputDevice.MsgProc(msg, wParam, lParam);
 	g_imeManager.MsgProc(hWnd, msg, wParam, lParam);
 	g_atlas->MsgProc(msg, wParam, lParam);
 
