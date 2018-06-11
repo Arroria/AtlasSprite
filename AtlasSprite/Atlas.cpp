@@ -25,12 +25,9 @@ void Atlas::Update()
 		if (GetRaycastUV(uv))
 		{
 			POINT pixel;
-			pixel.x = uv.x * m_texInfo.Width - 0.5f;
-			pixel.y = uv.y * m_texInfo.Height - 0.5f;
-
-			if (pixel.x < 0) pixel.x = 0;
-			if (pixel.y < 0) pixel.y = 0;
-
+			pixel.x = uv.x * m_texInfo.Width + 0.5f;
+			pixel.y = uv.y * m_texInfo.Height + 0.5f;
+			cout << pixel.x << " " << pixel.y << endl;
 			
 
 			constexpr size_t KEY_L = VK_LBUTTON;
@@ -50,13 +47,17 @@ void Atlas::Update()
 			{
 				NewAtlasPiece();
 				m_atlasPiece->left = pixel.x;
-				m_atlasPiece->top = pixel.y;
+				m_atlasPiece->bottom = pixel.y;
+				if (m_atlasPiece->right < m_atlasPiece->left)	m_atlasPiece->left = m_atlasPiece->right;
+				if (m_atlasPiece->top < m_atlasPiece->bottom)	m_atlasPiece->bottom = m_atlasPiece->top;
 			}
 			if (rKeyPressed)
 			{
 				NewAtlasPiece();
 				m_atlasPiece->right = pixel.x;
-				m_atlasPiece->bottom = pixel.y;
+				m_atlasPiece->top = pixel.y;
+				if (m_atlasPiece->right < m_atlasPiece->left)	m_atlasPiece->right = m_atlasPiece->left;
+				if (m_atlasPiece->top < m_atlasPiece->bottom)	m_atlasPiece->top = m_atlasPiece->bottom;
 			}
 			if (g_inputDevice.IsKeyDown(VK_RETURN))
 			{
@@ -69,6 +70,12 @@ void Atlas::Update()
 
 void Atlas::Render()
 {
+	m_device->SetRenderState(D3DRS_ZENABLE, false);
+	m_device->SetRenderState(D3DRS_ZWRITEENABLE, false);
+	
+	
+	
+	//Set World Matrix
 	if (m_tex)
 	{
 		D3DXMATRIX sm;
@@ -82,17 +89,32 @@ void Atlas::Render()
 		m_device->SetTransform(D3DTS_WORLD, &iden);
 	}
 
-	DEVICE->SetRenderState(D3DRS_ZENABLE, false);
-	DEVICE->SetRenderState(D3DRS_ZWRITEENABLE, false);
-	
+	//Tex
 	m_device->SetTexture(0, m_tex);
 	SingletonInstance(PlaneRenderer)->Render(m_device);
-	
+
+	//Frame
 	m_device->SetTexture(0, nullptr);
 	SingletonInstance(FrameRenderer)->Render(m_device, D3DXCOLOR(1, 0, 1, 1));
 
-	DEVICE->SetRenderState(D3DRS_ZENABLE, true);
-	DEVICE->SetRenderState(D3DRS_ZWRITEENABLE, true);
+	//Area
+	if (m_atlasPiece)
+	{
+		POINT size;
+		size.x = m_atlasPiece->right - m_atlasPiece->left;
+		size.y = m_atlasPiece->top - m_atlasPiece->bottom;
+
+		D3DXMATRIX pvt, sm, tm;
+		D3DXMatrixTranslation(&pvt, 0.5f, 0.5f, 0);
+		D3DXMatrixScaling(&sm, m_atlasPiece->right - m_atlasPiece->left, m_atlasPiece->top - m_atlasPiece->bottom, 1);
+		D3DXMatrixTranslation(&tm, m_atlasPiece->left - m_texInfo.Width * 0.5f, -m_atlasPiece->top + m_texInfo.Height * 0.5f, 0);
+		m_device->SetTransform(D3DTS_WORLD, &(pvt * sm * tm));
+		SingletonInstance(FrameRenderer)->Render(m_device, D3DXCOLOR(0, 1, 0, 1));
+	}
+
+
+	m_device->SetRenderState(D3DRS_ZENABLE, true);
+	m_device->SetRenderState(D3DRS_ZWRITEENABLE, true);
 }
 
 void Atlas::MsgProc(UINT uMsg, WPARAM wParam, LPARAM lParam)
@@ -149,7 +171,7 @@ void Atlas::ChangeTexture(const std::wstring & path)
 
 		//텍스쳐 크기에 화면을 맞춰줌
 		D3DVIEWPORT9 viewport;
-		DEVICE->GetViewport(&viewport);
+		m_device->GetViewport(&viewport);
 
 		SingletonInstance(Camera)->SetViewScale(
 			m_texInfo.Width / (float)viewport.Width > m_texInfo.Height / (float)viewport.Height ?
@@ -168,10 +190,10 @@ bool Atlas::GetRaycastUV(D3DXVECTOR2& uv)
 		D3DXMATRIX vm, pm, vInvM;
 		D3DVIEWPORT9 viewPort;
 
-		DEVICE->GetTransform(D3DTS_VIEW, &vm);
-		DEVICE->GetTransform(D3DTS_PROJECTION, &pm);
+		m_device->GetTransform(D3DTS_VIEW, &vm);
+		m_device->GetTransform(D3DTS_PROJECTION, &pm);
 		D3DXMatrixInverse(&vInvM, 0, &vm);
-		DEVICE->GetViewport(&viewPort);
+		m_device->GetViewport(&viewPort);
 
 		rayDir.x = ((mousePos.x * 2.f) / viewPort.Width - 1) / pm._11;
 		rayDir.y = ((mousePos.y * -2.f) / viewPort.Height + 1) / pm._22;
