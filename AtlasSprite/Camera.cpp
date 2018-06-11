@@ -37,14 +37,25 @@ void Camera::Update()
 	POINT mouseDelta = g_inputDevice.MouseDelta();
 	if (g_inputDevice.IsKeyPressed(VK_MBUTTON))
 	{
-		m_focus.x += m_viewScale * 0.001f * mouseDelta.x;
-		m_focus.y -= m_viewScale * 0.001f * mouseDelta.y;
+		m_focus.x -= m_viewScale * 0.001f * mouseDelta.x;
+		m_focus.y += m_viewScale * 0.001f * mouseDelta.y;
 	}
 }
 
 void Camera::SetProj()
 {
-	D3DXMATRIX tm;
-	D3DXMatrixTranslation(&tm, m_focus.x, m_focus.y, 0);
-	DEVICE->SetTransform(D3DTS_PROJECTION, &(tm * MatrixPerspectiveBySprite(m_screenRatio * m_viewScale, m_viewScale)));
+	D3DXMATRIX view;
+	D3DXMatrixLookAtLH(&view, &D3DXVECTOR3(m_focus.x, m_focus.y, -1), &D3DXVECTOR3(m_focus.x, m_focus.y, 1), &D3DXVECTOR3(0, 1, 0));
+	DEVICE->SetTransform(D3DTS_VIEW, &view);
+
+	auto GetProj = [](float width, float height)->D3DXMATRIX
+	{
+		D3DXMATRIX proj;
+		ZeroMemory(&proj, sizeof(D3DXMATRIX));	proj._44 = 1;
+		proj._11 = 2.f / width;
+		proj._22 = 2.f / height;
+		proj._33 = 1.f / 100;
+		return proj;
+	};
+	DEVICE->SetTransform(D3DTS_PROJECTION, &GetProj(m_screenRatio * m_viewScale, m_viewScale));
 }

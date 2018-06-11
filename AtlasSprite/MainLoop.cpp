@@ -41,7 +41,10 @@ bool MainLoop::Initialize()
 void MainLoop::Update()
 {
 	g_inputDevice.BeginFrame(g_processManager->GetWndInfo()->hWnd);
+
 	g_cam.Update();
+	g_atlas->Update();
+
 	g_inputDevice.EndFrame();
 }
 

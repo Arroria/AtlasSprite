@@ -17,7 +17,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	g_processManager = new ProcessManager(hInstance);
 	int lastWParam = -1;
 
-	if (SUCCEEDED( g_processManager->CreateWnd(L"UI Programing Practice", WS_OVERLAPPEDWINDOW, MainLoop::MsgProc) ))
+	if (SUCCEEDED( g_processManager->CreateWnd(L"UI Programing Practice", WS_POPUP, MainLoop::MsgProc) ))
 	{
 		g_processManager->WndResize(1280, 960);
 		g_processManager->WndMove(320, 60);

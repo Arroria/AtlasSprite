@@ -150,6 +150,7 @@
     <ClInclude Include="..\..\IME\IME\IME_Manager.h" />
     <ClInclude Include="Atlas.h" />
     <ClInclude Include="Camera.h" />
+    <ClInclude Include="FrameRenderer.h" />
     <ClInclude Include="main.h" />
     <ClInclude Include="MainLoop.h" />
     <ClInclude Include="PlaneRenderer.h" />
@@ -163,6 +164,7 @@
     <ClCompile Include="..\..\IME\IME\IME_Manager.cpp" />
     <ClCompile Include="Atlas.cpp" />
     <ClCompile Include="Camera.cpp" />
+    <ClCompile Include="FrameRenderer.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="MainLoop.cpp" />
     <ClCompile Include="PlaneRenderer.cpp" />

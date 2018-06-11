@@ -51,6 +51,9 @@
       <Filter>singleton</Filter>
     </ClInclude>
     <ClInclude Include="Camera.h" />
+    <ClInclude Include="FrameRenderer.h">
+      <Filter>singleton</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="AtlasSprite.rc">
@@ -89,5 +92,8 @@
       <Filter>singleton</Filter>
     </ClCompile>
     <ClCompile Include="Camera.cpp" />
+    <ClCompile Include="FrameRenderer.cpp">
+      <Filter>singleton</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>
