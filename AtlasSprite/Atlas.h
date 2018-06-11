@@ -1,6 +1,8 @@
 #pragma once
 
 
+using AtlasPiece = RECT;
+
 class Atlas
 {
 private:
@@ -8,8 +10,11 @@ private:
 
 	LPDIRECT3DTEXTURE9 m_tex;
 	D3DXIMAGE_INFO m_texInfo;
-
 	D3DXVECTOR3 m_raycastPlane[4];
+
+	AtlasPiece* m_atlasPiece;
+	std::vector<AtlasPiece*> m_atlasPieceList;
+
 
 private:
 	void ChangeTexture(const std::wstring& path);
@@ -24,4 +29,3 @@ public:
 	Atlas(LPDIRECT3DDEVICE9 device);
 	~Atlas();
 };
-

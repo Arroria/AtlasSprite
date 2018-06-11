@@ -6,6 +6,8 @@ Atlas::Atlas(LPDIRECT3DDEVICE9 device)
 	: m_device(device)
 
 	, m_tex(nullptr)
+
+	, m_atlasPiece(nullptr)
 {
 	ZeroMemory(&m_raycastPlane, sizeof(D3DXVECTOR3) * 4);
 }
@@ -22,7 +24,45 @@ void Atlas::Update()
 		D3DXVECTOR2 uv;
 		if (GetRaycastUV(uv))
 		{
-			cout << uv.x << " " << uv.y << endl;
+			POINT pixel;
+			pixel.x = uv.x * m_texInfo.Width - 0.5f;
+			pixel.y = uv.y * m_texInfo.Height - 0.5f;
+
+			if (pixel.x < 0) pixel.x = 0;
+			if (pixel.y < 0) pixel.y = 0;
+
+			
+
+			constexpr size_t KEY_L = VK_LBUTTON;
+			constexpr size_t KEY_R = VK_RBUTTON;
+			bool lKeyPressed = g_inputDevice.IsKeyPressed(KEY_L);
+			bool rKeyPressed = g_inputDevice.IsKeyPressed(KEY_R);
+			auto NewAtlasPiece = [&, this]()
+			{
+				if (!m_atlasPiece)
+				{
+					m_atlasPiece = new AtlasPiece;
+					m_atlasPiece->left = m_atlasPiece->right = pixel.x;
+					m_atlasPiece->top = m_atlasPiece->bottom = pixel.y;
+				}
+			};
+			if (lKeyPressed)
+			{
+				NewAtlasPiece();
+				m_atlasPiece->left = pixel.x;
+				m_atlasPiece->top = pixel.y;
+			}
+			if (rKeyPressed)
+			{
+				NewAtlasPiece();
+				m_atlasPiece->right = pixel.x;
+				m_atlasPiece->bottom = pixel.y;
+			}
+			if (g_inputDevice.IsKeyDown(VK_RETURN))
+			{
+
+				SAFE_DELETE(m_atlasPiece);
+			}
 		}
 	}
 }
