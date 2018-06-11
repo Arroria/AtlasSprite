@@ -89,21 +89,33 @@ void Atlas::MsgProc(UINT uMsg, WPARAM wParam, LPARAM lParam)
 
 void Atlas::ChangeTexture(const std::wstring & path)
 {
+	//기존 텍스쳐 제거
 	if (m_tex)
 		SAFE_RELEASE(m_tex);
-
+	
+	//텍스쳐 변경
 	D3DXCreateTextureFromFileExW(m_device, path.data(), D3DX_DEFAULT_NONPOW2, D3DX_DEFAULT_NONPOW2, NULL, NULL, D3DFMT_A8R8G8B8, D3DPOOL_MANAGED, D3DX_DEFAULT, D3DX_DEFAULT, NULL, &m_texInfo, nullptr, &m_tex);
-
 
 
 	if (m_tex)
 	{
+		//텍스쳐 크기에 맞는 레이캐스트 플랜 생성
 		float x = m_texInfo.Width	* 0.5f;
 		float y = m_texInfo.Height	* 0.5f;
 		m_raycastPlane[0] = D3DXVECTOR3(-x, +y, 0);
 		m_raycastPlane[1] = D3DXVECTOR3(+x, +y, 0);
 		m_raycastPlane[2] = D3DXVECTOR3(-x, -y, 0);
 		m_raycastPlane[3] = D3DXVECTOR3(+x, -y, 0);
+
+		//텍스쳐 크기에 화면을 맞춰줌
+		D3DVIEWPORT9 viewport;
+		DEVICE->GetViewport(&viewport);
+
+		SingletonInstance(Camera)->SetViewScale(
+			m_texInfo.Width / (float)viewport.Width > m_texInfo.Height / (float)viewport.Height ?
+			m_texInfo.Width : m_texInfo.Height
+		);
+		SingletonInstance(Camera)->SetFocus(D3DXVECTOR2(0, 0));
 	}
 }
 

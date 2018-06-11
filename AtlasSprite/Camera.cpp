@@ -42,7 +42,7 @@ void Camera::Update()
 	}
 }
 
-void Camera::SetProj()
+void Camera::ApplyTransform()
 {
 	D3DXMATRIX view;
 	D3DXMatrixLookAtLH(&view, &D3DXVECTOR3(m_focus.x, m_focus.y, -1), &D3DXVECTOR3(m_focus.x, m_focus.y, 1), &D3DXVECTOR3(0, 1, 0));

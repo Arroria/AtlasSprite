@@ -1,5 +1,8 @@
 #pragma once
-class Camera
+#include "Singleton.h"
+
+class Camera :
+	public Singleton<Camera>
 {
 private:
 	float m_screenRatio;
@@ -7,8 +10,12 @@ private:
 	D3DXVECTOR2 m_focus;
 
 public:
+	void SetFocus(const D3DXVECTOR2& focus) { m_focus = focus; }
+	void SetViewScale(float viewScale) { m_viewScale = viewScale; }
+
+public:
 	void Update();
-	void SetProj();
+	void ApplyTransform();
 
 public:
 	Camera();

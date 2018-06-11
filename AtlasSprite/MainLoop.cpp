@@ -6,8 +6,6 @@ IME_Manager g_imeManager;
 
 #include "Atlas.h"
 Atlas* g_atlas = nullptr;
-#include "Camera.h"
-Camera g_cam;
 
 bool MainLoop::Initialize()
 {
@@ -42,7 +40,7 @@ void MainLoop::Update()
 {
 	g_inputDevice.BeginFrame(g_processManager->GetWndInfo()->hWnd);
 
-	g_cam.Update();
+	SingletonInstance(Camera)->Update();
 	g_atlas->Update();
 
 	g_inputDevice.EndFrame();
@@ -50,7 +48,7 @@ void MainLoop::Update()
 
 bool MainLoop::Render()
 {
-	g_cam.SetProj();
+	SingletonInstance(Camera)->ApplyTransform();
 
 	LPD3DXSPRITE sp;
 	D3DXCreateSprite(DEVICE, &sp);
@@ -73,6 +71,9 @@ bool MainLoop::Render()
 
 bool MainLoop::Release()
 {
+
+
+
 #ifdef CREATE_CONSOLE
 	FreeConsole();
 #endif
