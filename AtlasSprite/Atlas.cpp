@@ -143,10 +143,11 @@ void Atlas::Render()
 		//XY
 		{
 			std::wstring str = 
-			L"MinU : " + std::to_wstring(m_atlasPiece->minU) +	L"\n" +
-			L"MinV : " + std::to_wstring(m_atlasPiece->minV) +	L"\n" +
-			L"MaxU : " + std::to_wstring(m_atlasPiece->maxU) +	L"\n" +
-			L"MaxV : " + std::to_wstring(m_atlasPiece->maxV);
+				std::wstring(L"선택 영역\n") +
+				L" - minU : " + std::to_wstring(m_atlasPiece->minU) +	L"\n" +
+				L" - minV : " + std::to_wstring(m_atlasPiece->minV) +	L"\n" +
+				L" - maxU : " + std::to_wstring(m_atlasPiece->maxU) +	L"\n" +
+				L" - maxV : " + std::to_wstring(m_atlasPiece->maxV);
 
 
 			LPD3DXSPRITE sp;
@@ -154,9 +155,9 @@ void Atlas::Render()
 			sp->Begin(D3DXSPRITE_ALPHABLEND);
 
 			LPD3DXFONT font;
-			D3DXCreateFontW(DEVICE, 10, 0, 0, 0, 0, 1, 0, 0, 0, L"", &font);
+			D3DXCreateFontW(DEVICE, 20, 0, 0, 0, 0, 1, 0, 0, 0, L"", &font);
 			RECT rc;
-			SetRect(&rc, 100, 100, 100, 100);
+			SetRect(&rc, 25, 100, 25, 100);
 			font->DrawTextW(sp, str.data() , -1, &rc, DT_NOCLIP, D3DXCOLOR(0, 0, 0, 1));
 			font->Release();
 
@@ -173,11 +174,15 @@ void Atlas::Render()
 		sp->Begin(D3DXSPRITE_ALPHABLEND);
 
 		LPD3DXFONT font;
-		D3DXCreateFontW(DEVICE, 10, 0, 0, 0, 0, 1, 0, 0, 0, L"", &font);
+		D3DXCreateFontW(DEVICE, 20, 0, 0, 0, 0, 1, 0, 0, 0, L"", &font);
 		RECT rc;
-		SetRect(&rc, 100, 100, 100, 100);
-		font->DrawTextW(sp, std::to_wstring(m_gridDist.x).data(), -1, &rc, DT_NOCLIP, D3DXCOLOR(0, 0, 0, 1));	rc.top = rc.bottom += 15;
-		font->DrawTextW(sp, std::to_wstring(m_gridDist.y).data(), -1, &rc, DT_NOCLIP, D3DXCOLOR(0, 0, 0, 1));
+		SetRect(&rc, 25, 25, 25, 25);
+		std::wstring _0 = L"그리드 간격"; if (m_imeManager) _0 += std::wstring(L" (") + (m_seleteX ? L"X" : L"Y") + L" 수정중)";
+		std::wstring _1 = L" - X : " + (m_imeManager && m_seleteX ? m_imeManager->GetString() : std::to_wstring(m_gridDist.x));
+		std::wstring _2 = L" - Y : " + (m_imeManager && !m_seleteX ? m_imeManager->GetString() : std::to_wstring(m_gridDist.y));
+		font->DrawTextW(sp, _0.data(), -1, &rc, DT_NOCLIP, D3DXCOLOR(0, 0, 0, 1));	rc.top = rc.bottom += 25;
+		font->DrawTextW(sp, _1.data(), -1, &rc, DT_NOCLIP, D3DXCOLOR(0, 0, 0, 1));	rc.top = rc.bottom += 25;
+		font->DrawTextW(sp, _2.data(), -1, &rc, DT_NOCLIP, D3DXCOLOR(0, 0, 0, 1));
 		font->Release();
 
 		sp->End();
