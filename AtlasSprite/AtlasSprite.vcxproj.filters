@@ -20,6 +20,9 @@
     <Filter Include="singleton\interface">
       <UniqueIdentifier>{5141ae90-73d9-41de-80d0-a98653ae402b}</UniqueIdentifier>
     </Filter>
+    <Filter Include="singleton\PrimitiveUp">
+      <UniqueIdentifier>{86d9f0af-d25c-462a-9695-9080344c0c72}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="targetver.h">
@@ -47,12 +50,15 @@
     <ClInclude Include="Singleton.h">
       <Filter>singleton\interface</Filter>
     </ClInclude>
-    <ClInclude Include="PlaneRenderer.h">
-      <Filter>singleton</Filter>
-    </ClInclude>
     <ClInclude Include="Camera.h" />
+    <ClInclude Include="PlaneRenderer.h">
+      <Filter>singleton\PrimitiveUp</Filter>
+    </ClInclude>
     <ClInclude Include="FrameRenderer.h">
-      <Filter>singleton</Filter>
+      <Filter>singleton\PrimitiveUp</Filter>
+    </ClInclude>
+    <ClInclude Include="LineRenderer.h">
+      <Filter>singleton\PrimitiveUp</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -88,12 +94,15 @@
     <ClCompile Include="Singleton.cpp">
       <Filter>singleton\interface</Filter>
     </ClCompile>
-    <ClCompile Include="PlaneRenderer.cpp">
-      <Filter>singleton</Filter>
-    </ClCompile>
     <ClCompile Include="Camera.cpp" />
+    <ClCompile Include="LineRenderer.cpp">
+      <Filter>singleton\PrimitiveUp</Filter>
+    </ClCompile>
+    <ClCompile Include="PlaneRenderer.cpp">
+      <Filter>singleton\PrimitiveUp</Filter>
+    </ClCompile>
     <ClCompile Include="FrameRenderer.cpp">
-      <Filter>singleton</Filter>
+      <Filter>singleton\PrimitiveUp</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

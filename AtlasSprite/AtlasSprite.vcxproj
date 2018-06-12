@@ -151,6 +151,7 @@
     <ClInclude Include="Atlas.h" />
     <ClInclude Include="Camera.h" />
     <ClInclude Include="FrameRenderer.h" />
+    <ClInclude Include="LineRenderer.h" />
     <ClInclude Include="main.h" />
     <ClInclude Include="MainLoop.h" />
     <ClInclude Include="PlaneRenderer.h" />
@@ -165,6 +166,7 @@
     <ClCompile Include="Atlas.cpp" />
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="FrameRenderer.cpp" />
+    <ClCompile Include="LineRenderer.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="MainLoop.cpp" />
     <ClCompile Include="PlaneRenderer.cpp" />

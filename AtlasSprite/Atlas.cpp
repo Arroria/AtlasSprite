@@ -7,7 +7,12 @@ Atlas::Atlas(LPDIRECT3DDEVICE9 device)
 
 	, m_tex(nullptr)
 
+
 	, m_atlasPiece(nullptr)
+
+	, m_imeManager(nullptr)
+	, m_seleteX(false)
+	, m_gridDist{ 0, 0 }
 {
 	ZeroMemory(&m_raycastPlane, sizeof(D3DXVECTOR3) * 4);
 }
@@ -21,50 +26,73 @@ void Atlas::Update()
 {
 	if (m_tex)
 	{
-		D3DXVECTOR2 uv;
-		if (GetRaycastUV(uv))
+		if (!m_imeManager)
 		{
-			POINT pixel;
-			pixel.x = uv.x * m_texInfo.Width + 0.5f;
-			pixel.y = uv.y * m_texInfo.Height + 0.5f;
-			cout << pixel.x << " " << pixel.y << endl;
-			
+			m_seleteX = false;
+			m_seleteX = g_inputDevice.IsKeyDown('A');
+			if (m_seleteX || g_inputDevice.IsKeyDown('S'))
+				m_imeManager = new IME_Manager;
+		}
 
-			constexpr size_t KEY_L = VK_LBUTTON;
-			constexpr size_t KEY_R = VK_RBUTTON;
-			bool lKeyPressed = g_inputDevice.IsKeyPressed(KEY_L);
-			bool rKeyPressed = g_inputDevice.IsKeyPressed(KEY_R);
-			auto NewAtlasPiece = [&, this]()
-			{
-				if (!m_atlasPiece)
-				{
-					m_atlasPiece = new AtlasPiece;
-					m_atlasPiece->left = m_atlasPiece->right = pixel.x;
-					m_atlasPiece->top = m_atlasPiece->bottom = pixel.y;
-				}
-			};
-			if (lKeyPressed)
-			{
-				NewAtlasPiece();
-				m_atlasPiece->left = pixel.x;
-				m_atlasPiece->bottom = pixel.y;
-				if (m_atlasPiece->right < m_atlasPiece->left)	m_atlasPiece->left = m_atlasPiece->right;
-				if (m_atlasPiece->top < m_atlasPiece->bottom)	m_atlasPiece->bottom = m_atlasPiece->top;
-			}
-			if (rKeyPressed)
-			{
-				NewAtlasPiece();
-				m_atlasPiece->right = pixel.x;
-				m_atlasPiece->top = pixel.y;
-				if (m_atlasPiece->right < m_atlasPiece->left)	m_atlasPiece->right = m_atlasPiece->left;
-				if (m_atlasPiece->top < m_atlasPiece->bottom)	m_atlasPiece->top = m_atlasPiece->bottom;
-			}
+
+
+		if (m_imeManager)
+		{
 			if (g_inputDevice.IsKeyDown(VK_RETURN))
 			{
-
-				SAFE_DELETE(m_atlasPiece);
+				(m_seleteX ? m_gridDist.x : m_gridDist.y) = _wtoi(m_imeManager->GetString().data());
+				SAFE_DELETE(m_imeManager);
 			}
 		}
+		else
+		{
+			D3DXVECTOR2 uv;
+			if (GetRaycastUV(uv))
+			{
+				POINT pixel;
+				pixel.x = uv.x * m_texInfo.Width + 0.5f;
+				pixel.y = uv.y * m_texInfo.Height + 0.5f;
+				cout << pixel.x << " " << pixel.y << endl;
+
+
+				bool lKeyPressed = g_inputDevice.IsKeyPressed(VK_LBUTTON);
+				bool rKeyPressed = g_inputDevice.IsKeyPressed(VK_RBUTTON);
+				auto NewAtlasPiece = [&, this]()
+				{
+					if (!m_atlasPiece)
+						m_atlasPiece = new AtlasPiece(pixel.x, pixel.y, pixel.x, pixel.y);
+				};
+
+				if (lKeyPressed)
+				{
+					NewAtlasPiece();
+					m_atlasPiece->minU = pixel.x;
+					m_atlasPiece->minV = pixel.y;
+					if (m_atlasPiece->maxU < m_atlasPiece->minU)	m_atlasPiece->minU = m_atlasPiece->maxU;
+					if (m_atlasPiece->maxV < m_atlasPiece->minV)	m_atlasPiece->minV = m_atlasPiece->maxV;
+				}
+				if (rKeyPressed)
+				{
+					NewAtlasPiece();
+					m_atlasPiece->maxU = pixel.x;
+					m_atlasPiece->maxV = pixel.y;
+					if (m_atlasPiece->maxU < m_atlasPiece->minU)	m_atlasPiece->maxU = m_atlasPiece->minU;
+					if (m_atlasPiece->maxV < m_atlasPiece->minV)	m_atlasPiece->maxV = m_atlasPiece->minV;
+				}
+
+				if (g_inputDevice.IsKeyDown(VK_BACK))
+				{
+					SAFE_DELETE(m_atlasPiece);
+				}
+				else if (g_inputDevice.IsKeyDown(VK_RETURN))
+				{
+					m_atlasPieceList.push_back(m_atlasPiece);
+
+				}
+			}
+		}
+
+		cout << m_gridDist.x << "GRID" << m_gridDist.y << endl;
 	}
 }
 
@@ -97,19 +125,99 @@ void Atlas::Render()
 	m_device->SetTexture(0, nullptr);
 	SingletonInstance(FrameRenderer)->Render(m_device, D3DXCOLOR(1, 0, 1, 1));
 
-	//Area
+	//AtlasPiece
 	if (m_atlasPiece)
 	{
 		POINT size;
-		size.x = m_atlasPiece->right - m_atlasPiece->left;
-		size.y = m_atlasPiece->top - m_atlasPiece->bottom;
+		size.x = m_atlasPiece->maxU - m_atlasPiece->minU;
+		size.y = m_atlasPiece->maxV - m_atlasPiece->minV;
 
 		D3DXMATRIX pvt, sm, tm;
 		D3DXMatrixTranslation(&pvt, 0.5f, 0.5f, 0);
-		D3DXMatrixScaling(&sm, m_atlasPiece->right - m_atlasPiece->left, m_atlasPiece->top - m_atlasPiece->bottom, 1);
-		D3DXMatrixTranslation(&tm, m_atlasPiece->left - m_texInfo.Width * 0.5f, -m_atlasPiece->top + m_texInfo.Height * 0.5f, 0);
+		D3DXMatrixScaling(&sm, m_atlasPiece->maxU - m_atlasPiece->minU, m_atlasPiece->maxV - m_atlasPiece->minV, 1);
+		D3DXMatrixTranslation(&tm, m_atlasPiece->minU - m_texInfo.Width * 0.5f, -m_atlasPiece->maxV + m_texInfo.Height * 0.5f, 0);
 		m_device->SetTransform(D3DTS_WORLD, &(pvt * sm * tm));
 		SingletonInstance(FrameRenderer)->Render(m_device, D3DXCOLOR(0, 1, 0, 1));
+
+
+		//XY
+		{
+			std::wstring str = 
+			L"MinU : " + std::to_wstring(m_atlasPiece->minU) +	L"\n" +
+			L"MinV : " + std::to_wstring(m_atlasPiece->minV) +	L"\n" +
+			L"MaxU : " + std::to_wstring(m_atlasPiece->maxU) +	L"\n" +
+			L"MaxV : " + std::to_wstring(m_atlasPiece->maxV);
+
+
+			LPD3DXSPRITE sp;
+			D3DXCreateSprite(DEVICE, &sp);
+			sp->Begin(D3DXSPRITE_ALPHABLEND);
+
+			LPD3DXFONT font;
+			D3DXCreateFontW(DEVICE, 10, 0, 0, 0, 0, 1, 0, 0, 0, L"", &font);
+			RECT rc;
+			SetRect(&rc, 100, 100, 100, 100);
+			font->DrawTextW(sp, str.data() , -1, &rc, DT_NOCLIP, D3DXCOLOR(0, 0, 0, 1));
+			font->Release();
+
+			sp->End();
+			sp->Release();
+		}
+	}
+
+
+	//x, y
+	{
+		LPD3DXSPRITE sp;
+		D3DXCreateSprite(DEVICE, &sp);
+		sp->Begin(D3DXSPRITE_ALPHABLEND);
+
+		LPD3DXFONT font;
+		D3DXCreateFontW(DEVICE, 10, 0, 0, 0, 0, 1, 0, 0, 0, L"", &font);
+		RECT rc;
+		SetRect(&rc, 100, 100, 100, 100);
+		font->DrawTextW(sp, std::to_wstring(m_gridDist.x).data(), -1, &rc, DT_NOCLIP, D3DXCOLOR(0, 0, 0, 1));	rc.top = rc.bottom += 15;
+		font->DrawTextW(sp, std::to_wstring(m_gridDist.y).data(), -1, &rc, DT_NOCLIP, D3DXCOLOR(0, 0, 0, 1));
+		font->Release();
+
+		sp->End();
+		sp->Release();
+	}
+
+	
+	//Grid
+	{
+		int x = 0;
+		int y = 0;
+		while (m_gridDist.x)
+		{
+			x += m_gridDist.x;
+			if (x < m_texInfo.Width)
+			{
+				D3DXMATRIX rm, sm, tm;
+				D3DXMatrixRotationZ(&rm, -0.5f * D3DX_PI);
+				D3DXMatrixScaling(&sm, 1, m_texInfo.Height, 1);
+				D3DXMatrixTranslation(&tm, (int)m_texInfo.Width * -0.5f + x, (int)m_texInfo.Height * 0.5f, 0);
+				m_device->SetTransform(D3DTS_WORLD, &(rm * sm * tm));
+				SingletonInstance(LineRenderer)->Render(m_device, D3DXCOLOR(1, 1, 1, 0.5f));
+			}
+			else
+				break;
+		}
+		while (m_gridDist.y)
+		{
+			y += m_gridDist.y;
+			if (y < m_texInfo.Height)
+			{
+				D3DXMATRIX sm, tm;
+				D3DXMatrixScaling(&sm, m_texInfo.Width, 1, 1);
+				D3DXMatrixTranslation(&tm, (int)m_texInfo.Width * -0.5f, (int)m_texInfo.Height * 0.5f - y, 0);
+				m_device->SetTransform(D3DTS_WORLD, &(sm * tm));
+				SingletonInstance(LineRenderer)->Render(m_device, D3DXCOLOR(1, 1, 1, 0.5f));
+			}
+			else
+				break;
+		}
 	}
 
 
@@ -117,8 +225,11 @@ void Atlas::Render()
 	m_device->SetRenderState(D3DRS_ZWRITEENABLE, true);
 }
 
-void Atlas::MsgProc(UINT uMsg, WPARAM wParam, LPARAM lParam)
+void Atlas::MsgProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
+	if (m_imeManager)
+		m_imeManager->MsgProc(hWnd, uMsg, wParam, lParam);
+		
 	switch (uMsg)
 	{
 	case WM_DROPFILES:
@@ -179,6 +290,9 @@ void Atlas::ChangeTexture(const std::wstring & path)
 		);
 		SingletonInstance(Camera)->SetFocus(D3DXVECTOR2(0, 0));
 	}
+
+	//AtlasPiece Á¦°Å
+	SAFE_DELETE(m_atlasPiece);
 }
 
 bool Atlas::GetRaycastUV(D3DXVECTOR2& uv)

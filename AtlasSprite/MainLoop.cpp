@@ -2,7 +2,6 @@
 #include "MainLoop.h"
 #define CREATE_CONSOLE
 
-IME_Manager g_imeManager;
 
 #include "Atlas.h"
 Atlas* g_atlas = nullptr;
@@ -50,19 +49,6 @@ bool MainLoop::Render()
 {
 	SingletonInstance(Camera)->ApplyTransform();
 
-	LPD3DXSPRITE sp;
-	D3DXCreateSprite(DEVICE, &sp);
-	sp->Begin(D3DXSPRITE_ALPHABLEND);
-	
-	LPD3DXFONT font;
-	D3DXCreateFontW(DEVICE, 10, 0, 0, 0, 0, 1, 0, 0, 0, L"", &font);
-	RECT rc;
-	SetRect(&rc, 100, 100, 100, 100);
-	font->DrawTextW(sp, g_imeManager.GetString().data(), -1, &rc, DT_NOCLIP, D3DXCOLOR(0, 0, 0, 1));
-	font->Release();
-
-	sp->End();
-	sp->Release();
 
 
 	g_atlas->Render();
@@ -84,16 +70,11 @@ bool MainLoop::Release()
 LRESULT MainLoop::MsgProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
 	g_inputDevice.MsgProc(msg, wParam, lParam);
-	g_imeManager.MsgProc(hWnd, msg, wParam, lParam);
-	g_atlas->MsgProc(msg, wParam, lParam);
+	if (g_atlas)
+		g_atlas->MsgProc(hWnd, msg, wParam, lParam);
 
 	switch (msg)
 	{
-	case WM_KEYDOWN:
-		if (wParam == VK_ESCAPE)
-			g_imeManager.Clear();
-		break;
-
 	case WM_DESTROY:
 		PostQuitMessage(0);
 		break;

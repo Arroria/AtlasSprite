@@ -1,7 +1,7 @@
 #pragma once
 
 
-using AtlasPiece = RECT;
+struct AtlasPiece;
 
 class Atlas
 {
@@ -12,9 +12,13 @@ private:
 	D3DXIMAGE_INFO m_texInfo;
 	D3DXVECTOR3 m_raycastPlane[4];
 
+
 	AtlasPiece* m_atlasPiece;
 	std::vector<AtlasPiece*> m_atlasPieceList;
 
+	IME_Manager* m_imeManager;
+	bool m_seleteX;
+	POINT m_gridDist;
 
 private:
 	void ChangeTexture(const std::wstring& path);
@@ -23,9 +27,19 @@ private:
 public:
 	void Update();
 	void Render();
-	void MsgProc(UINT uMsg, WPARAM wParam, LPARAM lParam);
+	void MsgProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 
 public:
 	Atlas(LPDIRECT3DDEVICE9 device);
 	~Atlas();
+};
+
+struct AtlasPiece
+{
+	long minU;
+	long minV;
+	long maxU;
+	long maxV;
+	AtlasPiece(long _minU, long _minV, long _maxU, long _maxV) 
+	: minU(_minU), maxV(_minV), maxU(_maxU), minV(_maxV) {}
 };
