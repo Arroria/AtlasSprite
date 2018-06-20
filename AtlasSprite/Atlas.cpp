@@ -11,6 +11,7 @@ Atlas::Atlas(LPDIRECT3DDEVICE9 device)
 	, m_atlasPiece(nullptr)
 
 	, m_imeManager(nullptr)
+	, m_isASPSaving(false)
 	, m_seleteX(false)
 	, m_gridDist{ 0, 0 }
 {
@@ -24,19 +25,35 @@ Atlas::~Atlas()
 
 void Atlas::Update()
 {
-	if (m_tex)
+	if (!m_tex)
+		return;
+
+	if (!m_imeManager)
 	{
-		if (!m_imeManager)
+		m_seleteX = false;
+		m_seleteX = g_inputDevice.IsKeyDown('A');
+		if (m_seleteX || g_inputDevice.IsKeyDown('S'))
+			m_imeManager = new IME_Manager;
+	}
+
+
+
+	if (m_imeManager)
+	{
+		if (m_isASPSaving)
 		{
-			m_seleteX = false;
-			m_seleteX = g_inputDevice.IsKeyDown('A');
-			if (m_seleteX || g_inputDevice.IsKeyDown('S'))
-				m_imeManager = new IME_Manager;
+			if (g_inputDevice.IsKeyDown(VK_RETURN))
+			{
+				if (m_atlasPiece)
+				{
+					m_atlasPiece->key = m_imeManager->GetString();
+					m_atlasPieceList.push_back(m_atlasPiece);
+					m_atlasPiece = nullptr;
+				}
+				SAFE_DELETE(m_imeManager);
+			}
 		}
-
-
-
-		if (m_imeManager)
+		else
 		{
 			if (g_inputDevice.IsKeyDown(VK_RETURN))
 			{
@@ -44,56 +61,73 @@ void Atlas::Update()
 				SAFE_DELETE(m_imeManager);
 			}
 		}
-		else
+	}
+	else
+	{
+		D3DXVECTOR2 uv;
+		if (GetRaycastUV(uv))
 		{
-			D3DXVECTOR2 uv;
-			if (GetRaycastUV(uv))
+			POINT pixel;
+			pixel.x = uv.x * m_texInfo.Width + 0.5f;
+			pixel.y = uv.y * m_texInfo.Height + 0.5f;
+			cout << pixel.x << " " << pixel.y << endl;
+
+
+			bool lKeyPressed = g_inputDevice.IsKeyPressed(VK_LBUTTON);
+			bool rKeyPressed = g_inputDevice.IsKeyPressed(VK_RBUTTON);
+			auto NewAtlasPiece = [&, this]()
 			{
-				POINT pixel;
-				pixel.x = uv.x * m_texInfo.Width + 0.5f;
-				pixel.y = uv.y * m_texInfo.Height + 0.5f;
-				cout << pixel.x << " " << pixel.y << endl;
+				if (!m_atlasPiece)
+					m_atlasPiece = new AtlasPiece(pixel.x, pixel.y, pixel.x, pixel.y);
+			};
 
+			if (lKeyPressed)
+			{
+				NewAtlasPiece();
+				m_atlasPiece->minU = pixel.x;
+				m_atlasPiece->minV = pixel.y;
+				if (m_atlasPiece->maxU < m_atlasPiece->minU)	m_atlasPiece->minU = m_atlasPiece->maxU;
+				if (m_atlasPiece->maxV < m_atlasPiece->minV)	m_atlasPiece->minV = m_atlasPiece->maxV;
+			}
+			if (rKeyPressed)
+			{
+				NewAtlasPiece();
+				m_atlasPiece->maxU = pixel.x;
+				m_atlasPiece->maxV = pixel.y;
+				if (m_atlasPiece->maxU < m_atlasPiece->minU)	m_atlasPiece->maxU = m_atlasPiece->minU;
+				if (m_atlasPiece->maxV < m_atlasPiece->minV)	m_atlasPiece->maxV = m_atlasPiece->minV;
+			}
 
-				bool lKeyPressed = g_inputDevice.IsKeyPressed(VK_LBUTTON);
-				bool rKeyPressed = g_inputDevice.IsKeyPressed(VK_RBUTTON);
-				auto NewAtlasPiece = [&, this]()
+			if (g_inputDevice.IsKeyDown(VK_BACK))
+			{
+				SAFE_DELETE(m_atlasPiece);
+			}
+			else if (g_inputDevice.IsKeyDown(VK_RETURN))
+			{
+				m_isASPSaving = true;
+				m_imeManager = new IME_Manager;
+			}
+			else if (g_inputDevice.IsKeyDown(VK_F1))
+			{
+				std::fstream file;
+				file.imbue(std::locale("kor"));
+
+				file.open("./_Result.asp", std::ios::out | std::ios::trunc);
+				for (auto& asp : m_atlasPieceList)
 				{
-					if (!m_atlasPiece)
-						m_atlasPiece = new AtlasPiece(pixel.x, pixel.y, pixel.x, pixel.y);
-				};
-
-				if (lKeyPressed)
-				{
-					NewAtlasPiece();
-					m_atlasPiece->minU = pixel.x;
-					m_atlasPiece->minV = pixel.y;
-					if (m_atlasPiece->maxU < m_atlasPiece->minU)	m_atlasPiece->minU = m_atlasPiece->maxU;
-					if (m_atlasPiece->maxV < m_atlasPiece->minV)	m_atlasPiece->minV = m_atlasPiece->maxV;
+					file << '\"' << asp->key.string() << "\" " <<
+						asp->minU << ' ' <<
+						asp->maxU << ' ' <<
+						asp->minV << ' ' <<
+						asp->maxV << ' ' <<
+						endl;
 				}
-				if (rKeyPressed)
-				{
-					NewAtlasPiece();
-					m_atlasPiece->maxU = pixel.x;
-					m_atlasPiece->maxV = pixel.y;
-					if (m_atlasPiece->maxU < m_atlasPiece->minU)	m_atlasPiece->maxU = m_atlasPiece->minU;
-					if (m_atlasPiece->maxV < m_atlasPiece->minV)	m_atlasPiece->maxV = m_atlasPiece->minV;
-				}
-
-				if (g_inputDevice.IsKeyDown(VK_BACK))
-				{
-					SAFE_DELETE(m_atlasPiece);
-				}
-				else if (g_inputDevice.IsKeyDown(VK_RETURN))
-				{
-					m_atlasPieceList.push_back(m_atlasPiece);
-
-				}
+				file.close();
 			}
 		}
-
-		cout << m_gridDist.x << "GRID" << m_gridDist.y << endl;
 	}
+
+	cout << m_gridDist.x << "GRID" << m_gridDist.y << endl;
 }
 
 void Atlas::Render()

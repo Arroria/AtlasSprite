@@ -17,6 +17,7 @@ private:
 	std::vector<AtlasPiece*> m_atlasPieceList;
 
 	IME_Manager* m_imeManager;
+	bool m_isASPSaving;
 	bool m_seleteX;
 	POINT m_gridDist;
 
@@ -40,6 +41,7 @@ struct AtlasPiece
 	long minV;
 	long maxU;
 	long maxV;
+	std::filesystem::path key;
 	AtlasPiece(long _minU, long _minV, long _maxU, long _maxV) 
 	: minU(_minU), maxV(_minV), maxU(_maxU), minV(_maxV) {}
 };
